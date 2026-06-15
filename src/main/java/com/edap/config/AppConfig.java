@@ -3,9 +3,13 @@ package com.edap.config;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,6 +21,12 @@ public class AppConfig {
      * Tracks total component lookup requests (REST + gRPC combined).
      * Exposed as: edap_component_lookup_total
      */
+    @Primary
+    @Bean("transactionManager")
+    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+        return new JpaTransactionManager(emf);
+    }
+
     @Bean
     public Counter componentLookupCounter(MeterRegistry registry) {
         return Counter.builder("edap_component_lookup_total")
