@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package com.edap.grpc;
+
+option java_package = "com.edap.grpc";
+option java_outer_classname = "EntityServiceProto";
+option java_multiple_files = true;
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message ComponentProto {
+  string id          = 1;
+  string name        = 2;
+  string type        = 3;
+  string owner       = 4;
+  string team        = 5;
+  string status      = 6;
+  map<string, string> metadata = 7;
+  string created_at  = 8;
+  string updated_at  = 9;
+}
+
+message DependencyEdge {
+  string source_component_id = 1;
+  string target_component_id = 2;
+  string type                = 3;   // DEPENDS_ON | CALLS | OWNS
+  double weight              = 4;
+}
+
+message GetComponentRequest {
+  string id = 1;
+}
+
+message GetComponentResponse {
+  ComponentProto component = 1;
+}
+
+message ListComponentsRequest {
+  string team        = 1;  // optional filter
+  string status      = 2;  // optional filter
+  int32  page        = 3;
+  int32  page_size   = 4;
+}
+
+message ListComponentsResponse {
+  repeated ComponentProto components = 1;
+  int64 total_count                  = 2;
+}
+
+message GetDependencyGraphRequest {
+  string root_component_id = 1;
+  int32  depth             = 2;  // how many hops to traverse
+}
+
+message GetDependencyGraphResponse {
+  repeated ComponentProto  nodes = 1;
+  repeated DependencyEdge  edges = 2;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service ComponentService {
+  // Fetch a single component by ID
+  rpc GetComponent (GetComponentRequest) returns (GetComponentResponse);
+
+  // List components with optional filters
+  rpc ListComponents (ListComponentsRequest) returns (ListComponentsResponse);
+
+  // Return the dependency sub-graph rooted at a component
+  rpc GetDependencyGraph (GetDependencyGraphRequest) returns (GetDependencyGraphResponse);
+}

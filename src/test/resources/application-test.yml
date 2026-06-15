@@ -1,0 +1,56 @@
+# Test profile — uses H2 in-memory for MySQL and disables Neo4j
+spring:
+  datasource:
+    url: jdbc:h2:mem:edap_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=MySQL;NON_KEYWORDS=VALUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # Let Hibernate own the schema in tests
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false   # disable in tests; Hibernate creates the schema
+
+  # Disable Neo4j auto-configuration in test slice
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: neo4jpass
+  data:
+    neo4j:
+      repositories:
+        enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.neo4j.Neo4jAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.neo4j.Neo4jDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.neo4j.Neo4jRepositoriesAutoConfiguration
+
+edap:
+  security:
+    jwt:
+      secret: 6A586E327235753778214125442A472D4B6150645367566B5970337336763979
+      expiration-ms: 3600000
+
+grpc:
+  server:
+    port: -1   # disable gRPC server in tests
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+
+logging:
+  level:
+    com.edap: WARN
+    org.springframework.security: WARN

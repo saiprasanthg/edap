@@ -1,0 +1,49 @@
+---
+# ClusterIP — internal service discovery
+apiVersion: v1
+kind: Service
+metadata:
+  name: edap-service
+  namespace: edap
+  labels:
+    app.kubernetes.io/name: edap
+    app.kubernetes.io/component: service
+spec:
+  type: ClusterIP
+  selector:
+    app: edap-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+
+---
+# NodePort — external access for dev/staging
+apiVersion: v1
+kind: Service
+metadata:
+  name: edap-nodeport
+  namespace: edap
+  labels:
+    app.kubernetes.io/name: edap
+    app.kubernetes.io/component: nodeport
+spec:
+  type: NodePort
+  selector:
+    app: edap-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30080
+      protocol: TCP
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+      nodePort: 30090
+      protocol: TCP

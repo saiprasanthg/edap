@@ -1,0 +1,87 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: engineering-data-access-platform
+
+  # ── MySQL / JPA ──────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:mysql://localhost:3306/edap_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: edap_user
+    password: edap_pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate       # Flyway owns the schema; Hibernate only validates
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        default_batch_fetch_size: 30
+
+  # ── Flyway ───────────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # ── Neo4j ────────────────────────────────────────────────────────────────
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: neo4jpass
+
+  data:
+    neo4j:
+      database: neo4j
+
+# ── gRPC ─────────────────────────────────────────────────────────────────────
+grpc:
+  server:
+    port: 9090
+    security:
+      enabled: false    # JWT auth handled at REST layer; gRPC is internal
+
+# ── Actuator / Prometheus ─────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# ── Application-specific ─────────────────────────────────────────────────────
+edap:
+  security:
+    jwt:
+      # 256-bit Base64-encoded secret — change in production via env var EDAP_JWT_SECRET
+      secret: 6A586E327235753778214125442A472D4B6150645367566B5970337336763979
+      expiration-ms: 86400000   # 24 hours
+
+logging:
+  level:
+    com.edap: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
