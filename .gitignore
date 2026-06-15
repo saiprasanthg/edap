@@ -9,3 +9,5 @@ target/
 .DS_Store
 .env
 .mvn/wrapper/
+frontend/node_modules/
+frontend/dist/
