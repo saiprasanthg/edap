@@ -4,6 +4,8 @@ import com.edap.security.JwtAuthenticationFilter;
 import com.edap.security.JwtTokenProvider;
 import com.edap.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import net.devh.boot.grpc.server.security.authentication.CompositeGrpcAuthenticationReader;
+import net.devh.boot.grpc.server.security.authentication.GrpcAuthenticationReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Collections;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -28,6 +32,11 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
+
+    @Bean
+    public GrpcAuthenticationReader grpcAuthenticationReader() {
+        return new CompositeGrpcAuthenticationReader(Collections.emptyList());
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

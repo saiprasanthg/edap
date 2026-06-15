@@ -134,14 +134,14 @@ public class ComponentService {
         component.setRepositoryUrl(request.getRepositoryUrl());
         component.setMetadata(request.getMetadata());
 
-        component = componentRepository.save(component);
+        Component saved = componentRepository.save(component);
 
         // Sync Neo4j node
         Team finalTeam = team;
         componentNodeRepository.findByComponentId(id).ifPresent(node -> {
-            node.setName(component.getName());
-            node.setType(component.getType());
-            node.setStatus(component.getStatus());
+            node.setName(saved.getName());
+            node.setType(saved.getType());
+            node.setStatus(saved.getStatus());
             node.setTeamName(finalTeam != null ? finalTeam.getName() : null);
             componentNodeRepository.save(node);
         });
